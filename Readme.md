@@ -8,7 +8,7 @@
 
 ## Service Deployment
 
-### Build and Import FastAPI Service
+### Backend Service (FastAPI)
 1. Build the FastAPI Docker image:
     ```bash
     cd service/fastapi
@@ -20,16 +20,27 @@
     k3d image import fastapi-demo:latest -c iot
     ```
 
-### Deploy Kubernetes Resources
-1. Apply all Kubernetes configurations:
+3. Deploy the API resources:
     ```bash
     kubectl apply -f k8s/api/
     ```
 
+### Frontend Service (Next.js)
+1. Build the UI Docker image:
+    ```bash
+    cd service/ui/ui-app
+    docker build -t nextjs-demo:latest .
+    ```
+
+2. Import the image to the k3d cluster:
+    ```bash
+    k3d image import nextjs-demo:latest -c iot
+    ```
+
 ## Database Setup
 
-### Connect to PostgreSQL
-1. Find the Postgres pod:
+### PostgreSQL Configuration
+1. Identify the Postgres pod:
     ```bash
     kubectl get pods -l app=postgres
     ```
@@ -39,30 +50,48 @@
     kubectl exec -it <postgres-pod-name> -- psql -U postgres -d iot_pv
     ```
 
-### Create Database Schema
-Execute the following SQL to create the PV readings table:
-```sql
-CREATE TABLE pv_readings (
-     timestamp timestamptz NOT NULL,
-     time timestamptz NOT NULL,
-     device_id text NOT NULL,
-     site text NOT NULL,
-     lat double precision NOT NULL,
-     lon double precision NOT NULL,
-     ac_power double precision NOT NULL,
-     dc_voltage double precision NOT NULL,
-     dc_current double precision NOT NULL,
-     temperature_module double precision NOT NULL,
-     temperature_ambient double precision NOT NULL,
-     operational boolean NOT NULL,
-     fault_code integer,
-     metadata jsonb
-);
-```
+3. Initialize the database schema:
+    ```sql
+    CREATE TABLE pv_readings (
+      timestamp timestamptz NOT NULL,
+      time timestamptz NOT NULL,
+      device_id text NOT NULL,
+      site text NOT NULL,
+      lat double precision NOT NULL,
+      lon double precision NOT NULL,
+      ac_power double precision NOT NULL,
+      dc_voltage double precision NOT NULL,
+      dc_current double precision NOT NULL,
+      temperature_module double precision NOT NULL,
+      temperature_ambient double precision NOT NULL,
+      operational boolean NOT NULL,
+      fault_code integer,
+      metadata jsonb
+    );
+    ```
 
-## Testing the Application
-To access the FastAPI service locally:
+## Accessing the Application
+
+### Backend API
 ```bash
 kubectl port-forward svc/fastapi 8000:80
 ```
-You can now access the API at http://localhost:8000
+Access the API documentation at: http://localhost:8000/docs
+
+### Frontend UI
+```bash
+kubectl port-forward svc/nextjs 3000:80
+```
+Access the UI at: http://localhost:3000
+
+## Additional Information
+
+- The Kubernetes configuration files are located in the `k8s/` directory
+- Backend code is available in `service/api/`
+- Frontend code is available in `service/ui/`
+- The repository includes an autoscaling demo for the FastAPI service
+- Ingress configuration is provided but requires additional setup
+
+> Note: Integration with Grafana/Tafekik for advanced dashboarding is planned for future implementation.
+
+
