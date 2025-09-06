@@ -1,5 +1,6 @@
 # IoT Challenge Setup Guide
 
+
 ## Cluster Setup
 1. Create a cluster using k3d:
     ```bash
@@ -92,6 +93,6 @@ Access the UI at: http://localhost:3000
 - The repository includes an autoscaling demo for the FastAPI service
 - Ingress configuration is provided but requires additional setup
 
-> Note: Integration with Grafana/Tafekik for advanced dashboarding is planned for future implementation.
+> Note: Sorry about the .env files and taefrik I made the dashboard but couln't connect the getway-api ( I could just do this in 3 hours )
 
 
