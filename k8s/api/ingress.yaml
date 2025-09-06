@@ -1,0 +1,14 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: fastapi-ingress
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`localhost`) && PathPrefix(`/api`)
+      kind: Rule
+      services:
+        - name: fastapi
+          port: 80
