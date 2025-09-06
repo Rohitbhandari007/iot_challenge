@@ -12,6 +12,25 @@ log = logging.getLogger("crud")
 
 
 async def insert_readings_batch(readings: List[PVReading]):
+    """
+    Asynchronously inserts a batch of PV readings into the database.
+    This function processes a list of PV readings, performs validation and data type conversion,
+    and inserts the valid records into the 'pv_readings' table using the PostgreSQL COPY protocol
+    for efficient batch insertion.
+    Args:
+        readings (List[PVReading]): A list of PVReading objects to be inserted into the database.
+                                   Each object contains device information, measurements, status,
+                                   location, and metadata.
+    Returns:
+        None
+    Raises:
+        asyncpg.exceptions.PostgresError: If the database insertion operation fails.
+    Notes:
+        - The function handles timestamp conversion from ISO format strings to datetime objects
+        - Invalid records (those causing exceptions during processing) are logged and skipped
+        - Empty input lists or situations where all records are invalid are handled gracefully
+        - Metadata is serialized to JSON before storage
+    """
     if not readings:
         return
 
@@ -20,21 +39,19 @@ async def insert_readings_batch(readings: List[PVReading]):
 
     for r in readings:
         try:
-            # Parse timestamp if it's a string
             if isinstance(r.timestamp, str):
                 timestamp_dt = datetime.fromisoformat(r.timestamp.replace('Z', '+00:00'))
             else:
                 timestamp_dt = r.timestamp
 
-            # Handle fault_code conversion
             fault_code = r.status.fault_code
             if isinstance(fault_code, str):
                 fault_code = int(fault_code) if fault_code.isdigit() else None
 
             records.append(
                 (
-                    timestamp_dt,      # for 'timestamp' column
-                    timestamp_dt,      # for 'time' column (same value)
+                    timestamp_dt,
+                    timestamp_dt,
                     r.device_id,
                     r.location.site,
                     r.location.coordinates.lat,

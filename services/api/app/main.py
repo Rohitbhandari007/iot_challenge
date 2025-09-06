@@ -45,13 +45,8 @@ async def submit_reading(payload: PVReading):
     return {"status": "queued"}
 
 @app.get("/")
-async def list_events(
-    device_id: str = None,
-    limit: int = 100,
-
-    pool: asyncpg.Pool = Depends(get_db_pool)
-):
-    return await get_readings(pool=pool, device_id=device_id, limit=limit)
+async def check():
+    return {"status": "ok"}
 
 @app.get("/api/events")
 async def list_events(
